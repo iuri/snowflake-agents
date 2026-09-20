@@ -1,0 +1,18 @@
+# Step 5: Core Agent Studio Blueprint Spec File
+name: "sales_enterprise_agent"
+description: "Cross-functional agent evaluating structured sales matrices and unstructured product manuals."
+role: "<% ctx.target.role %>"
+warehouse: "<% ctx.target.warehouse %>"
+
+tools:
+  - tool_spec:
+      type: "cortex_analyst_text_to_sql"
+      name: "sales_structured_analyst"
+    tool_resources:
+      semantic_view: "<% ctx.var.database_name %>.<% ctx.var.schema_name %>.sales_analyst_layer"
+
+  - tool_spec:
+      type: "cortex_search"
+      name: "product_knowledge_search"
+    tool_resources:
+      search_service: "<% ctx.var.database_name %>.<% ctx.var.schema_name %>.product_knowledge_search"

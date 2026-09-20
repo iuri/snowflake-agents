@@ -1,0 +1,28 @@
+definition_version: "2.0"
+project:
+  name: "cortex_agent_project"
+
+# Use environment-specific variables for seamless DEV to PROD deployment
+variables:
+  environment: <% ctx.env.name %>
+  database: <% ctx.var.database_name %>
+  schema: <% ctx.var.schema_name %>
+
+targets:
+  dev:
+    account: "dev_account_locator"
+    user: "dev_deployer"
+    role: "DEV_AGENT_ROLE"
+    warehouse: "DEV_WH"
+    variables:
+      database_name: "DEV_DB"
+      schema_name: "CORTEX_SCHEMA"
+  
+  prod:
+    account: "prod_account_locator"
+    user: "prod_deployer"
+    role: "PROD_AGENT_ROLE"
+    warehouse: "PROD_WH"
+    variables:
+      database_name: "PROD_DB"
+      schema_name: "CORTEX_SCHEMA"
