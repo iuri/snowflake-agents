@@ -1,0 +1,13 @@
+{
+  "name": "SALES_INTELIGENCE_AGENT",
+  "database_name": "SALES_INTELLIGENCE",
+  "schema_name": "DATA",
+  "owner": "ACCOUNTADMIN",
+  "comment": "A sakes intelligence agent that analyzes B2B sales data by combining structured deal metrics with unstructured sales conversation insights",
+  "profile": "{\"display_name\":\"SALES_INTELIGENCE_AGENT\",\"avatar\":\"SparklesAgentIcon\"}",
+  "agent_spec": "{\"models\":{\"orchestration\":\"auto\"},\"orchestration\":{},\"instructions\":{\"orchestration\":\"You are a sales intelligence agent designed to help sales team make data-drive decisions. \\nYou have access to both structured sales metrics and unstructured sales conversation transcripts. \\nWhen users ask about quantitative metrics content like win rates, deal values, or sales performance, use the Sales Metrics semantic view. When users ask about conversation content, customer concerns, or what was discussed in call, use the Sales Conversations search service. For complex questions requiring both types of content, use both tools.\\n\\n\\nIf a question is ambiguous, ask a clarifying question instead if guessing. Always cite your sources. When you use the semantic view, mention you queried sales metrics. When you use search, mention which conversations you found. Provide actionable insights, not just raw data.\",\"sample_questions\":[{\"question\":\"What are the main concerns in the TechCorp discovery call?\"}]},\"tools\":[{\"tool_spec\":{\"type\":\"cortex_analyst_text_to_sql\",\"name\":\"sales_metrics\",\"description\":\"Query sales performance and metrics data\"}},{\"tool_spec\":{\"type\":\"cortex_search\",\"name\":\"SALES_INTELLIGENCE_CONVERSATIONS_SEARCH\",\"description\":\"This search tool contains all sales conversations with customers\"}},{\"tool_spec\":{\"type\":\"web_search\",\"name\":\"Web Search\"}},{\"tool_spec\":{\"type\":\"code_execution\",\"name\":\"code_execution\"}}],\"skills\":[],\"tool_resources\":{\"SALES_INTELLIGENCE_CONVERSATIONS_SEARCH\":{\"max_results\":4,\"search_service\":\"SALES_INTELLIGENCE.DATA.SALESCONVERSATIONSEARCH\"},\"Web Search\":{\"max_results\":10},\"code_execution\":{},\"sales_metrics\":{\"execution_environment\":{\"type\":\"warehouse\",\"warehouse\":\"COMPUTE_WH\"},\"semantic_view\":\"SALES_INTELLIGENCE.DATA.SALES_METRICS_VIEW\"}}}",
+  "created_on": "2026-09-19 16:40:38.834000-07:00",
+  "default_version_name": "VERSION$2",
+  "versions": "[\"VERSION$1\",\"VERSION$2\"]",
+  "aliases": "{\"DEFAULT\":\"VERSION$2\",\"FIRST\":\"VERSION$1\",\"LAST\":\"VERSION$2\"}"
+}
