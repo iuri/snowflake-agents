@@ -43,3 +43,16 @@ CREATE OR REPLACE GIT REPOSITORY agent_governance.git.my_agent_repo
 -- Step 5: Synchronize and Connect to Agent Studio (Cortex Agents)
 -- To pull the absolute latest state of your configuration files, models, and tools from GitHub into Snowflake's active runtime, execute a fetch:
 ALTER GIT REPOSITORY agent_governance.git.my_agent_repo FETCH;
+
+
+
+
+-- 2. Configure Snowflake for Tokenless OIDC (Security Best Practice)To avoid standard passwords or API token rot inside GitHub,
+-- link your GitHub organization directory explicitly to your Snowflake Security cluster. 
+-- Run this setup statement inside Snowflake using the ACCOUNTADMIN role:
+CREATE OR REPLACE SECURITY INTEGRATION github_actions_oidc_integration
+  TYPE = EXTERNAL_STAGE
+  STAGE_PROVIDER = OIDC
+  ENABLED = TRUE
+  ISSUER = 'https://githubusercontent.com'
+  AUDIENCE_LIST = ('https://github.com<your-github-organization-or-username>');

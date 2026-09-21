@@ -1,0 +1,90 @@
+name: CI/CD Snowflake Agent Lifecycle
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'snowflake.yml'
+      - 'database_ddl/**'
+      - 'search_services/**'
+      - 'agents/**'
+  push:
+    branches: [ main ]
+    paths:
+      - 'snowflake.yml'
+      - 'database_ddl/**'
+      - 'search_services/**'
+      - 'agents/**'
+
+permissions:
+  id-token: write     # Required for OIDC secure authentication
+  contents: read      # Required to check out code repositories
+
+jobs:
+  validate-and-test:
+    name: Dry-Run and Validate (DEV)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: Check out Repository Source Code
+        uses: actions/checkout@v4
+
+      - name: Initialize Snowflake CLI
+        uses: snowflakedb/snowflake-actions@v3
+        with:
+          use-oidc: true  # Prevents saving static passwords in GitHub
+
+      - name: Test DEV Target Interactivity
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SF_DEV_ACCOUNT }}
+          SNOWFLAKE_USER: ${{ secrets.SF_DEV_USER }}
+          SNOWFLAKE_ROLE: ${{ secrets.SF_DEV_ROLE }}
+          SNOWFLAKE_WAREHOUSE: ${{ secrets.SF_DEV_WAREHOUSE }}
+        run: |
+          echo "[+] Validating connection credentials against DEV workspace..."
+          snow connection test --target dev
+
+  deploy-to-production:
+    name: Promote Infrastructure & Agents (PROD)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Check out Repository Source Code
+        uses: actions/checkout@v4
+
+      - name: Initialize Snowflake CLI
+        uses: snowflakedb/snowflake-actions@v3
+        with:
+          use-oidc: true
+
+      - name: Deploy Sequential Infrastructure Dependencies
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SF_PROD_ACCOUNT }}
+          SNOWFLAKE_USER: ${{ secrets.SF_PROD_USER }}
+          SNOWFLAKE_ROLE: ${{ secrets.SF_PROD_ROLE }}
+          SNOWFLAKE_WAREHOUSE: ${{ secrets.SF_PROD_WAREHOUSE }}
+        run: |
+          echo "[1/4] Running Core Structural DDL Layouts..."
+          snow sql --target prod -f database_ddl/01_tables.sql
+          
+          echo "[2/4] Deploying Dynamic Semantic Views for Cortex Analyst..."
+          snow sql --target prod -f database_ddl/02_semantic_views.sql
+          
+          echo "[3/4] Initializing Hybrid Cortex Search Vector Indexing..."
+          snow sql --target prod -f search_services/03_cortex_search.sql
+          
+          echo "[4/4] Deploying Network Egress Controls..."
+          snow sql --target prod -f tools/network_rules.sql
+
+      - name: Compile and Update Cortex Agent Studio Manifests
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SF_PROD_ACCOUNT }}
+          SNOWFLAKE_USER: ${{ secrets.SF_PROD_USER }}
+          SNOWFLAKE_ROLE: ${{ secrets.SF_PROD_ROLE }}
+          SNOWFLAKE_WAREHOUSE: ${{ secrets.SF_PROD_WAREHOUSE }}
+        run: |
+          echo "[+] Re-building Cortex Agent blueprints onto Production Targets..."
+          # Instructs the Snowflake CLI to bundle the verified workspace objects into PROD
+          snow cortex agent deploy --target prod --file agents/sales_agent_spec.yaml
